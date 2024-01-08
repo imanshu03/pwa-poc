@@ -1,0 +1,20 @@
+{
+  "name": "CRED's Agent App",
+  "short_name": "Agent",
+  "start_url": ".",
+  "display": "fullscreen",
+  "description": "CRED's agent app for collection",
+  "background_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "/icons/cred-196x196.png",
+      "sizes": "196x196",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/cred-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
