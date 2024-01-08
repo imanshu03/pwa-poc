@@ -17,7 +17,9 @@ const REQUEST_CACHE_URL = ["dummyjson.com", ".woff2", ".woff"];
 const networkFirstAndCache = async (request) => {
   if (
     request.method === "GET" &&
-    REQUEST_CACHE_URL.some((e) => request.url.includes(e))
+    [...REQUEST_CACHE_URL, self.location.origin].some((e) =>
+      request.url.includes(e)
+    )
   ) {
     // first try to load response from network and save to cache
     try {
