@@ -2,7 +2,7 @@
   "name": "CRED's Agent App",
   "short_name": "Agent",
   "start_url": ".",
-  "display": "fullscreen",
+  "display": "standalone",
   "description": "CRED's agent app for collection",
   "background_color": "#FFFFFF",
   "icons": [
