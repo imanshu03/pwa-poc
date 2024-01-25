@@ -8,9 +8,9 @@ const PwaInstallable = () => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    const isInstalledPWA =
-      window.matchMedia("(display-mode: browser)").matches ||
-      window.matchMedia("(display-mode: standalone)").matches;
+    const isInstalledPWA = window.matchMedia(
+      "(display-mode: standalone)"
+    ).matches;
 
     if (!isInstalledPWA) {
       window.addEventListener("beforeinstallprompt", function (e) {
