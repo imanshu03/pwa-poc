@@ -85,10 +85,23 @@ self.addEventListener("push", function (event) {
       ? event.data.text()
       : '{"title":"Dummy Title","body":"Dummy Message"}'
   );
-  console.log({ payload });
-  event.waitUntil(
-    self.registration.showNotification(payload.title, {
-      body: payload.body,
-    })
-  );
+  const options = {
+    requireInteraction: true,
+    body: payload.body,
+    icon: "/icons/cred-196x196.png",
+    actions:
+      payload.action.title && payload.action.href
+        ? [{ action: "view", title: payload.action.title }]
+        : undefined,
+    data: payload.action?.href ? { url: payload.action.href } : {},
+  };
+  console.log("SW Push", { payload, options });
+  event.waitUntil(self.registration.showNotification(payload.title, options));
+});
+
+self.addEventListener("notificationclick", function (event) {
+  const payload = event.notification.data;
+  if (event.action === "view") {
+    clients.openWindow(payload.url || "https://google.com");
+  }
 });

@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { set } from "lodash";
 
 const Notifications = () => {
   const router = useRouter();
@@ -8,11 +9,16 @@ const Notifications = () => {
     title: "",
     body: "",
     delay: 0,
+    action: {
+      title: "",
+      href: "",
+    },
   });
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setState({ ...state, [name]: value });
+    set(state, name, value);
+    setState({ ...state });
   };
 
   const onClick = async () => {
@@ -37,7 +43,7 @@ const Notifications = () => {
   const allowNotification = () => {
     Notification.requestPermission().then(async (result) => {
       if (result === "granted") {
-        await window._subscribeToNotifications();
+        await window._subscribeToNotifications?.();
       }
     });
   };
@@ -49,28 +55,62 @@ const Notifications = () => {
         <button onClick={allowNotification}>Allow Notifications</button>
       </div>
       <div className="grow" />
-      <input
-        type="text"
-        name="title"
-        placeholder="title"
-        value={state.title}
-        onChange={onChange}
-      />
-      <input
-        type="text"
-        name="body"
-        placeholder="body"
-        value={state.body}
-        onChange={onChange}
-      />
-      <input
-        type="number"
-        name="delay"
-        placeholder="delay"
-        value={state.delay}
-        onChange={onChange}
-      />
-      <button onClick={onClick}>Send Notification</button>
+      <div className="flex flex-col items-stretch justify-start gap-2 w-[80%]">
+        <label>Title</label>
+        <input
+          type="text"
+          name="title"
+          placeholder="Enter notification title"
+          value={state.title}
+          onChange={onChange}
+          className="border p-2"
+        />
+      </div>
+      <div className="flex flex-col items-stretch justify-start gap-2 w-[80%]">
+        <label>Body</label>
+        <input
+          type="text"
+          name="body"
+          placeholder="Enter notification body"
+          value={state.body}
+          onChange={onChange}
+          className="border p-2"
+        />
+      </div>
+      <div className="flex flex-col items-stretch justify-start gap-2 w-[80%]">
+        <label>Action</label>
+        <input
+          type="text"
+          name="action.title"
+          placeholder="Enter action title"
+          value={state.action.title}
+          onChange={onChange}
+          className="border p-2"
+        />
+        <input
+          type="text"
+          name="action.href"
+          placeholder="Enter action link"
+          value={state.action.href}
+          onChange={onChange}
+          className="border p-2"
+        />
+      </div>
+      <div className="flex flex-col items-stretch justify-start gap-2 w-[80%]">
+        <label>Delay</label>
+        <input
+          type="number"
+          name="delay"
+          placeholder="Enter delay"
+          value={state.delay}
+          onChange={onChange}
+          className="border p-2"
+        />
+      </div>
+
+      <button onClick={onClick} className="border p-4 bg-black text-white">
+        Send Notification
+      </button>
       <div className="grow" />
     </div>
   );

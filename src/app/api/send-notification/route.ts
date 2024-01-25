@@ -11,7 +11,7 @@ const dummyPromise = (delay: number) =>
   new Promise((resolve) => setTimeout(() => resolve(true), delay * 1000));
 
 export async function POST(req: NextRequest) {
-  const { subscription, title, body, delay } = await req.json();
+  const { subscription, title, body, delay, action } = await req.json();
 
   try {
     if (delay > 0) {
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     }
     await webPush.sendNotification(
       subscription,
-      JSON.stringify({ title, body })
+      JSON.stringify({ title, body, action })
     );
     return NextResponse.json({ message: "Notification Sent" }, { status: 201 });
   } catch (error) {
