@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import LocationContextProvider from "./LocationContext";
 import Script from "next/script";
-import { urlBase64ToUint8Array } from "./utils";
+import PwaInstallable from "./PwaInstallable";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -86,6 +86,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <LocationContextProvider>{children}</LocationContextProvider>
+        <PwaInstallable />
       </body>
     </html>
   );
