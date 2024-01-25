@@ -86,14 +86,10 @@ self.addEventListener("push", function (event) {
       : '{"title":"Dummy Title","body":"Dummy Message"}'
   );
   const options = {
-    requireInteraction: true,
+    requireInteraction: !!payload.href,
     body: payload.body,
     icon: "/icons/cred-196x196.png",
-    actions:
-      payload.action.title && payload.action.href
-        ? [{ action: "view", title: payload.action.title }]
-        : undefined,
-    data: payload.action?.href ? { url: payload.action.href } : {},
+    data: payload.href ? { url: payload.href } : {},
   };
   console.log("SW Push", { payload, options });
   event.waitUntil(self.registration.showNotification(payload.title, options));
@@ -101,7 +97,7 @@ self.addEventListener("push", function (event) {
 
 self.addEventListener("notificationclick", function (event) {
   const payload = event.notification.data;
-  if (event.action === "view") {
-    clients.openWindow(payload.url || "https://google.com");
+  if (payload.url) {
+    clients.openWindow(payload.url);
   }
 });

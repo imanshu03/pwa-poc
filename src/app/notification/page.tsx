@@ -9,10 +9,7 @@ const Notifications = () => {
     title: "",
     body: "",
     delay: 0,
-    action: {
-      title: "",
-      href: "",
-    },
+    href: "",
   });
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,20 +75,12 @@ const Notifications = () => {
         />
       </div>
       <div className="flex flex-col items-stretch justify-start gap-2 w-[80%]">
-        <label>Action</label>
+        <label>Action Link</label>
         <input
           type="text"
-          name="action.title"
-          placeholder="Enter action title"
-          value={state.action.title}
-          onChange={onChange}
-          className="border p-2"
-        />
-        <input
-          type="text"
-          name="action.href"
+          name="href"
           placeholder="Enter action link"
-          value={state.action.href}
+          value={state.href}
           onChange={onChange}
           className="border p-2"
         />
