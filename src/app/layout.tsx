@@ -32,15 +32,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <Script id="notification-permissions">
-          {`
-              Notification.requestPermission().then((result) => {
-                if (result === "granted") {
-                  console.log('Permission Granted');
-                }
-              });
-          `}
-        </Script>
         <Script id="service-worker">
           {`
             function urlBase64ToUint8Array(base64String) {
@@ -75,17 +66,17 @@ export default function RootLayout({
                   window._subscription = subscription;
                   console.log("Push Notification Subscribed", subscription);
                 }
-                Notification.requestPermission().then(async (result) => {
-                  if(result === "granted") {
-                    if(registration.active?.state === "activated") {
-                      await getSubscription();
-                    } else {
-                      navigator.serviceWorker.ready.then((reg) => {
-                        getSubscription();
-                      });
-                    }
+                if(Notification.permission === "granted") {
+                  if(registration.active?.state === "activated") {
+                    await getSubscription();
+                  } else {
+                    navigator.serviceWorker.ready.then((reg) => {
+                      getSubscription();
+                    });
                   }
-                });
+                } else {
+                  window._subscribeToNotifications = getSubscription;
+                }
               } catch (error) {
                 console.error(error);
               }
