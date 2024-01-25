@@ -1,5 +1,5 @@
-const CACHE_NAME = "temp_v1";
-
+const CACHE_NAME = `cache_v${Math.floor(Math.random() * 1000000000000)}`;
+` `;
 const PRECACHE_URLS = ["/"];
 
 const addResourcesToCache = async (resources) => {
@@ -12,25 +12,25 @@ const putInCache = async (request, response) => {
   await cache.put(request, response);
 };
 
-const REQUEST_CACHE_URL = ["dummyjson.com", ".woff2", ".woff"];
+const ASSETS_REGEX = /\.(html|css|js|woff|woff2|ttf|eot|svg)$/;
 
 const networkFirstAndCache = async (request) => {
+  const requestURL = new URL(request.url);
   if (
     request.method === "GET" &&
-    [...REQUEST_CACHE_URL, self.location.origin].some((e) =>
-      request.url.includes(e)
-    )
+    self.location.href.includes(requestURL.origin) &&
+    ASSETS_REGEX.test(requestURL.pathname)
   ) {
     // first try to load response from network and save to cache
     try {
       const responseFromNetwork = await fetch(request.clone());
       putInCache(request, responseFromNetwork.clone());
-      console.log("Returned from network", { request });
+      console.log(`Returned from network: ${request.url}`, { request });
       return responseFromNetwork;
     } catch {
       const cachedResponse = await caches.match(request);
       if (cachedResponse) {
-        console.log("Returned from caching", { request });
+        console.log(`Returned from caching: ${request.url}`, { request });
         return cachedResponse;
       }
 
@@ -75,6 +75,20 @@ self.addEventListener("activate", function (event) {
 
 self.addEventListener("fetch", async function (event) {
   const { request } = event;
-  console.log("Original Request", { request });
+  console.log(`Original Request: ${request.url}`, { request });
   event.respondWith(networkFirstAndCache(request));
+});
+
+self.addEventListener("push", function (event) {
+  const payload = JSON.parse(
+    event.data
+      ? event.data.text()
+      : '{"title":"Dummy Title","body":"Dummy Message"}'
+  );
+  console.log({ payload });
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+    })
+  );
 });

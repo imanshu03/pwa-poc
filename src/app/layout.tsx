@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import path from "path";
-import fs from "fs";
 import LocationContextProvider from "./LocationContext";
 import Script from "next/script";
+import { urlBase64ToUint8Array } from "./utils";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,47 +28,65 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cssContent: string[] = [];
-  const appendScriptsToHead = (pathName: string) => {
-    const files = fs.readdirSync(pathName);
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const filePath = path.resolve(pathName, file);
-      const stat = fs.statSync(filePath);
-      if (stat.isFile()) {
-        const content = fs.readFileSync(filePath, { encoding: "utf-8" });
-        cssContent.push(content);
-      } else if (stat.isDirectory()) {
-        appendScriptsToHead(filePath);
-      }
-    }
-  };
-
-  let paths = ["static"];
-  let currentPath;
-  while (true) {
-    paths.unshift("..");
-    currentPath = path.resolve(__dirname, ...paths);
-    if (fs.existsSync(currentPath)) break;
-  }
-
-  const cssPaths = path.resolve(currentPath, "css");
-  appendScriptsToHead(cssPaths);
-
+  const publicKey = process.env.VAPID_PUBLIC_KEY;
   return (
     <html lang="en">
       <head>
-        {cssContent.map((content, i) => (
-          <style key={i} dangerouslySetInnerHTML={{ __html: content }}></style>
-        ))}
+        <Script id="notification-permissions">
+          {`
+              Notification.requestPermission().then((result) => {
+                if (result === "granted") {
+                  console.log('Permission Granted');
+                }
+              });
+          `}
+        </Script>
         <Script id="service-worker">
           {`
+            function urlBase64ToUint8Array(base64String) {
+              var padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+              var base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
+            
+              var rawData = window.atob(base64);
+              var outputArray = new Uint8Array(rawData.length);
+            
+              for (var i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+              }
+              return outputArray;
+            };
             (async function () {
-              const registration = await navigator.serviceWorker.register(
-                "/sw.js",
-                { scope: "." }
-              );
-              console.log("Service worker registration", registration);
+              try {
+                const registration = await navigator.serviceWorker.register(
+                  "/sw.js",
+                  { scope: "." }
+                );
+                console.log("Service worker registration", registration);
+
+                async function getSubscription() {
+                  const convertedKey = urlBase64ToUint8Array("${publicKey}");
+                  let subscription = await registration.pushManager.getSubscription();
+                  if(!subscription) {
+                    subscription = await registration.pushManager.subscribe({
+                      userVisibleOnly: true,
+                      applicationServerKey: convertedKey
+                    });
+                  }
+                  window._subscription = subscription;
+                  console.log("Push Notification Subscribed", subscription);
+                }
+                if(registration.active?.state === "activated") {
+                  await getSubscription();
+                } else {
+                  navigator.serviceWorker.ready.then((reg) => {
+                    getSubscription();
+                  });
+                }
+  
+              
+              } catch (error) {
+                console.error(error);
+              }
             })();
           `}
         </Script>
