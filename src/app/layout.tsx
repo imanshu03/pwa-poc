@@ -75,15 +75,17 @@ export default function RootLayout({
                   window._subscription = subscription;
                   console.log("Push Notification Subscribed", subscription);
                 }
-                if(registration.active?.state === "activated") {
-                  await getSubscription();
-                } else {
-                  navigator.serviceWorker.ready.then((reg) => {
-                    getSubscription();
-                  });
-                }
-  
-              
+                Notification.requestPermission().then(async (result) => {
+                  if(result === "granted") {
+                    if(registration.active?.state === "activated") {
+                      await getSubscription();
+                    } else {
+                      navigator.serviceWorker.ready.then((reg) => {
+                        getSubscription();
+                      });
+                    }
+                  }
+                });
               } catch (error) {
                 console.error(error);
               }
