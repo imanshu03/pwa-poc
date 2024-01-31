@@ -13,6 +13,8 @@ const dummyPromise = (delay: number) =>
 export async function POST(req: NextRequest) {
   const { subscription, title, body, delay, href } = await req.json();
 
+  console.log("Subscription:", { subscription, title, body, delay, href });
+
   try {
     if (delay > 0) {
       await dummyPromise(delay);
